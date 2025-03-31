@@ -1,0 +1,10 @@
+---
+
+- hosts: all
+# - hosts: webservers
+
+  tasks:
+
+    - name: Just a debug 
+      ansible.builtin.debug:
+        msg: "{{ env }} ---- {{ debug_msg }}"

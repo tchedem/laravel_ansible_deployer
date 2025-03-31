@@ -1,0 +1,39 @@
+---
+
+### ADD YOUR VARIABLES
+
+debug_msg : This is the debug msg of database-srv
+
+
+### Template
+
+# Redis Auth
+REDIS_PASSWORD: 
+
+# MySQL Root User Account
+mysql_root_user : 
+mysql_root_user_password : 
+
+# SFSA : Simple Full-Stack Application
+mysql_SFSA_database: 
+mysql_SFSA_user: 
+mysql_SFSA_password: 
+
+mysqldb_SFSA_database: 
+mysqldb_SFSA_user: 
+mysqldb_SFSA_password: 
+
+
+mysql_users: 
+
+  - username: 
+    database_name: 
+    privileges: 
+    password: 
+    host : 
+
+  # - username: 
+  #   database_name: 
+  #   privileges: 
+  #   password: 
+  #   host : 

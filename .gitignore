@@ -1,0 +1,7 @@
+filter_plugins
+library
+module_utils
+scripts
+vagrant
+
+errors.md

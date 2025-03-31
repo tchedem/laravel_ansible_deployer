@@ -1,0 +1,15 @@
+env: test
+enable_log: true
+
+# THOSE Value will be used exclusivly by ansible
+# ex: tasks logs
+env_prod: production
+env_stag: staging
+env_test: test
+env_local: local
+
+env_values:
+  - "{{ env_prod }}"
+  - "{{ env_stag }}"
+  - "{{ env_test }}"
+  - "{{ env_local }}"
