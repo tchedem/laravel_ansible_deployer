@@ -1,3 +1,10 @@
+#### Create your project with this repo
+
+```bash
+git clone git@github.com:tchedem/ansible-quick-starter.git {project_name}
+```
+
+
 The `inventory` directory contain all the Control Nodes.
 
 Command to start the project
