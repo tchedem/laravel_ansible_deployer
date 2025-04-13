@@ -1,4 +1,21 @@
-The `inventory` directory contain all the Managed Nodes and some critical data. **So never, ever push it on a public/private repo!**
+### Ansible Quick Starter
+
+The Ansible Quick Starter repository is designed to help you quickly set up your Ansible projects. It provides a basic structure to kick-start your Ansible work with minimal configuration.
+
+#####  How to Use This Repository
+
+Clone the repository and rename the project folder:
+
+```bash
+git clone git@github.com:tchedem/ansible-quick-starter.git {your_project_name}
+cd {your_project_name}
+bash ./init.sh
+```
+
+
+##### Run Playbooks
+
+The `inventory` directory contain all the Managed Nodes and some critical data. **So, never, ever push it on a public/private repo!**
 
 Command to run a playbook
 
@@ -11,15 +28,15 @@ Run playbook with secret
  ansible-playbook -i hosts.ini playbooks.yaml -u vagrant --vault-password-file='/path/to/vault/file'
 ```
 
----
+
 
 #### How to deal with secret
 
-*If you need to publish your playbooks on a repo (private||public), never ever push it with your `inventories` directory!*
+*If you need to publish your playbooks on a repo (private||public), never ever push it with your `inventories` directory! Secrets should be kept secure.*
 
 Talking about secrets, they are dozen of method available to protect secrets and avoid unauthorize access to them. Solution's like, `Ansible Vault`, `Github Action Secrets`, `AWS Secrets Manager`, ... are design to fit your needs and protect sensitive informations needed by your playbook
 
-Here is a little tuto on Ansible Vault 
+**Here is a little tuto with `Ansible Vault`**
 
 ```bash
 
@@ -38,12 +55,10 @@ Here is a little tuto on Ansible Vault
 ```
 
 
-
-
 ---
 
 
-Reference:
+***Reference:***
 
 https://docs.ansible.com/ansible/latest/tips_tricks/sample_setup.html
 
