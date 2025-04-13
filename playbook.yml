@@ -7,4 +7,4 @@
 
     - name: Just a debug 
       ansible.builtin.debug:
-        msg: "{{ env }} ---- {{ debug_msg }}"
+        msg: "ENV: {{ env }} ---- MSG: {{ debug_msg }}"
