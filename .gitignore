@@ -2,6 +2,9 @@ filter_plugins
 library
 module_utils
 scripts
-vagrant
+# vagrant
 
+notes.md
 errors.md
+i.md
+.vaultFile

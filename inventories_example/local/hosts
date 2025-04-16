@@ -1,0 +1,14 @@
+[webservers]
+192.168.56.155
+192.168.56.200
+
+[database-srv]
+192.168.56.201
+192.168.56.202
+
+[all:children]
+webservers
+database-srv
+
+;[local]
+;127.0.0.1 ansible_connection=local
