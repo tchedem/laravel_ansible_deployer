@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: yes
+  vars_files:
+    # - roles/deploy-laravel-all/vars/main.yaml
+
+  roles:
+    - role: deploy-laravel-app

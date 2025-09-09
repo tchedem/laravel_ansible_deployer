@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-app
+
+- name: Execute Laravel maintenance commands
+  command: "{{ item }}"
+  args:
+    chdir: "{{ laravel_app1_path }}"
+  loop:
+    - php artisan migrate --force
+    - php artisan storage:link
+    - php artisan horizon:terminate

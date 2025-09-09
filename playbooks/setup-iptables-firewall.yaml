@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: yes
+  vars_files:
+    # - roles/composer/vars/main.yaml
+
+  roles:
+    - role: iptables-firewall

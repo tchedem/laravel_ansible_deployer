@@ -1,0 +1,14 @@
+[program:horizon]
+process_name=%(program_name)s_%(process_num)02d  # Add %(process_num) for multiple processes
+command=php {{ laravel_app1_path }}/artisan horizon
+autostart=true
+autorestart=true
+killasgroup=true
+numprocs={{ laravel_numprocs }}
+{% raw %}
+# user={{ laravel_user }}
+{% endraw %}
+user={{ system_user }}
+redirect_stderr=true
+stdout_logfile={{ laravel_app1_path }}/horizon.log
+stopwaitsecs=3600

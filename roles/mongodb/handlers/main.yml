@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/mongodb
+
+- name: Update the packages database index
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+
+- name: Update the package index
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes

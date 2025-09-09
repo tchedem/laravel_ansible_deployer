@@ -1,0 +1,9 @@
+---
+
+- hosts: database-srvs
+  become: yes
+  vars_files:
+    # - roles/mongodb/vars/main.yaml
+
+  roles:
+    - role: mongodb

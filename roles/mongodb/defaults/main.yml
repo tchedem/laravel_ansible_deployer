@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/mongodb
+mongo_version: "5"
+# mongo_version: "8"
+
+distro: "{{ ansible_distribution }}{{ansible_distribution_major_version}}"

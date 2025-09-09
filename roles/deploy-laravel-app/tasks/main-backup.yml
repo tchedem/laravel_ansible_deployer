@@ -1,0 +1,332 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-all
+
+# Configure database users for the application
+
+
+# - name: Debug should_create_luc_user
+#   debug:
+#     msg: "should_create_luc_user is set to {{ should_create_luc_user }}"
+
+
+- name: 'Create MariaDB user "{{ luc_user_username }}" account'
+  # when: should_create_app_user == true
+  mysql_user:
+    state: present
+    name: "{{ mariadb_SLAWP_user }}"
+    password: "{{ mariadb_SLAWP_password }}"
+    priv: "{{ mariadb_SLAWP_database }}.*:ALL,GRANT"  # Fixed privilege syntax
+    login_user: "{{ mariadb_root_user }}"
+    login_password: "{{ mariadb_root_user_password }}"
+    column_case_sensitive: true
+  become: yes
+
+# - name: "Remove luc user if not allowed"
+#   when: should_create_luc_user == 'no'
+#   mysql_user:
+#     # host: localhost
+#     state: absent
+#     name: luc
+#     password: root
+#     login_user: root
+#     login_password: "{{ root_user_password }}"
+#     column_case_sensitive: true
+
+
+- name: Generate SSH key if it doesn't exist
+  command: ssh-keygen -f /home/vagrant/.ssh/ansible-custome-labkey -P ""
+  args:
+    creates: /home/vagrant/.ssh/ansible-custome-labkey
+  become_user: vagrant
+
+- name: Set GIT_SSH_COMMAND environment variable
+  lineinfile:
+    path: /home/vagrant/.bashrc
+    line: 'export GIT_SSH_COMMAND="ssh -i /home/vagrant/.ssh/ansible-custome-labkey"'
+    create: yes
+  become_user: vagrant
+
+
+# - name: Fetch all branches from remote
+#   command: git fetch --all
+#   args:
+#     chdir: "{{ SLAWP_project_path }}"
+#   become_user: vagrant
+
+
+# - name: Checkout the remote branch
+#   command: git checkout feature/LH/21-03-2025
+#   args:
+#     chdir: "{{ SLAWP_project_path }}"
+#   become_user: vagrant
+
+
+- name: Clone the repo
+  git:
+    # repo: "git@github.com:tchedem/simple-laravel-api-with-performance.git"
+    repo: "https://github.com/tchedem/simple-laravel-api-with-performance.git"
+    dest: "{{ SLAWP_project_path }}"
+    key_file: "/home/vagrant/.ssh/ansible-custome-labkey"
+    recursive: yes
+    single_branch: false
+    force: yes
+    update: yes
+    # version: main
+    # version: feature/LH/21-03-2025
+    # version: feature/LH/19-05-2025
+    # version: develop
+    version: feature/LH/21-05-2025
+  # become_user: vagrant
+  # become: yes
+
+
+- name: Check if .env file exists
+  ansible.builtin.stat:
+    path: "{{ SLAWP_project_path }}/.env"
+  register: env_file_exist
+
+- name: Copy dot env file to the project (equivalent to 0644)
+  ansible.builtin.template:
+    # src: /mytemplates/foo.j2
+    src: "templates/.env.j2"
+    dest: "{{ SLAWP_project_path }}/.env"
+    owner: vagrant
+    group: www-data
+    mode: u=rwx,g=rwx,o=r # 664 (775)
+  become: yes
+  when: not env_file_exist.stat.exists
+
+- name: Check if composer is installed
+  command: which composer
+  # ignore_errors: yes
+  register: composer_version
+  become_user: vagrant
+
+
+- name: Install project dependencies
+  shell: "cd {{ SLAWP_project_path }} && composer install -q --no-interaction"
+  when: composer_version.rc == 0
+  become: yes
+
+# Commented
+# # - name: Example clone of a single branch
+# #   ansible.builtin.git:
+# #     repo: "https://github.com/tchedem/simple-laravel-api-with-performance.git"
+# #     dest: /tmp/checkout
+# #     single_branch: yes
+# #     version: main
+
+- name: Check if APP_KEY is already set
+  command: grep -E "^APP_KEY=.+$" "/var/www/sys-net/simple-laravel-api-with-performance/.env"
+  # command: awk -F= '$1=="APP_KEY" && $2!=""' "/var/www/sys-net/simple-laravel-api-with-performance/.env"
+  # changed_when: false
+  register: app_key_check
+  ignore_errors: yes
+
+
+- name: Run some commands
+  ansible.builtin.shell: |
+
+    redis-cli -a 7e024176-3c36-4e6e-89ac-ea608a41e40bb7725410-c8ca-47fa-b2b9-385f4305dcd3 -n 0 FLUSHDB 2> /dev/null
+    
+    php /var/www/sys-net/simple-laravel-api-with-performance/artisan queue:clear --queue=default
+    php /var/www/sys-net/simple-laravel-api-with-performance/artisan queue:clear --queue=test-queue
+
+
+    php /var/www/sys-net/simple-laravel-api-with-performance/artisan queue:flush --queue=default
+    php /var/www/sys-net/simple-laravel-api-with-performance/artisan queue:flush --queue=test-queue
+
+    php /var/www/sys-net/simple-laravel-api-with-performance/artisan cache:clear
+    php /var/www/sys-net/simple-laravel-api-with-performance/artisan db:wipe
+    echo '' > /var/www/sys-net/simple-laravel-api-with-performance/storage/logs/laravel.log
+    echo '' > /var/www/sys-net/simple-laravel-api-with-performance/storage/logs/jobs.laravel.log
+    echo '' > /var/www/sys-net/simple-laravel-api-with-performance/horizon.log
+
+
+- name: Generate APP KEY
+  ansible.builtin.command: php /var/www/sys-net/simple-laravel-api-with-performance/artisan key:generate
+  when: app_key_check.rc != 0
+
+# 111 : 7
+# 110 : 6
+# 101 : 5
+# 100 : 4
+# 011 : 3
+# 010 : 2
+# 001 : 1
+# 000 : 0
+
+
+# - name: debug
+#   ansible.builtin.debug:
+#     var: app_key_check
+
+# - name: fail
+#   ansible.builtin.fail:
+#     msg: stop it
+
+
+# sudo chown -R $USER:www-data /var/www/<your-project>/storage
+# sudo chown -R $USER:www-data /var/www/<your-project>/bootstrap/cache
+# sudo chmod -R 775 storage
+# sudo chmod -R 775 bootstrap/cache
+
+# To identify your web server user and group use the following commands.
+# // for nginx
+# ps aux|grep nginx|grep -v grep
+# // for apache
+# ps aux | egrep '(apache|httpd)'
+
+- name: Change ownership of storage directory
+  shell: |
+    chown -R vagrant:www-data /var/www/sys-net/simple-laravel-api-with-performance/storage/
+    chown -R vagrant:www-data /var/www/sys-net/simple-laravel-api-with-performance/bootstrap/cache
+    chmod -R 775 /var/www/sys-net/simple-laravel-api-with-performance/storage
+    chmod -R 775 /var/www/sys-net/simple-laravel-api-with-performance/bootstrap/cache
+  become: true
+
+
+- name: Check if ACL package is installed
+  command: which getfacl
+  # ignore_errors: yes
+  register: acl_version
+  # become_user: vagrant
+  ignore_errors: true
+
+- name: Install ACL on Debian/Ubuntu
+  ansible.builtin.apt:
+    name: acl
+    state: present
+  register: acl_version
+  become: yes
+
+
+# - name: debug
+#   ansible.builtin.debug:
+#     msg: "{{ acl_version }}"
+
+# - ansible.builtin.fail:
+#     msg: stopped
+
+- name: Set app users ACLs for storage directory
+  shell: |
+    setfacl -Rm u:www-data:rwx /var/www/sys-net/simple-laravel-api-with-performance/storage
+    setfacl -Rm u:vagrant:rwx /var/www/sys-net/simple-laravel-api-with-performance/storage
+  # when: not acl_version
+
+# - name: Set vagrant user ACLs for storage directory
+#   shell:
+
+
+# # php artisan storage:link
+
+# # - name: Install project dependencies
+# #   shell: "cd /var/www/sys-net/simple-laravel-api-with-performance; composer install -q -no-interaction"
+# #   # command: composer install -q -no-interaction
+# #   # args:
+# #   #   chdir: /var/www/sys-net/simple-laravel-api-with-performance  # Set the working directory
+# #   when: composer_version.rc == 0
+# #   become_user: vagrant
+
+# # args is unsupported
+# # - name: Install project dependencies
+# #   command: composer install -q --no-interaction
+# #   args:
+# #     chdir: /var/www/sys-net/simple-laravel-api-with-performance
+# #   when: composer_version.rc == 0
+# #   become_user: vagrant
+
+# # - name: Install project dependencies
+# #   command: composer install -q --no-interaction
+# #   args:
+# #     chdir: /var/www/sys-net/simple-laravel-api-with-performance
+# #   when: composer_version.rc == 0
+# #   become_user: vagrant
+
+
+# - name: Configure the .env file
+#   include_role:
+#     name: configure_myAppName_laravel
+
+
+### Setup Supervisor
+
+- name: Make sure Supervisor is installed
+  ansible.builtin.apt:
+    name: supervisor
+    state: present
+  register: supervisor
+  become: yes
+
+
+- name: Copy supervisor config to the server
+  ansible.builtin.template:
+    backup: true
+    src: "templates/supervisor_template.j2"
+    dest: "/etc/supervisor/conf.d/{{ simple_laravel_app_name }}.conf"
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: yes
+
+- name: Run supervisord commands
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - sudo systemctl restart supervisor
+    - sudo supervisorctl reread
+    - sudo supervisorctl update
+    - sudo supervisorctl restart horizon:*
+    # - sudo supervisorctl start simple_laravel_api_with_performance
+
+
+# php artisan install laravel/horizon; php artisan install predis/predis
+
+
+#### Run migrations, storage links, and restart horizon
+
+# - name: Execute Laravel maintenance commands
+#   shell: |
+#     php artisan migrate --force && \
+#     php artisan storage:link && \
+#     php artisan horizon:terminate
+#   args:
+#     chdir: /opt/projectname
+
+# - name: Run Laravel migrations
+#   shell: php artisan migrate --force
+#   args:
+#     chdir: /opt/projectname
+
+# - name: Create storage symlink
+#   shell: php artisan storage:link
+#   args:
+#     chdir: /opt/projectname
+
+# - name: Restart Laravel Horizon
+#   shell: php artisan horizon:terminate
+#   args:
+#     chdir: /opt/projectname
+
+- name: Execute Laravel maintenance commands
+  command: "{{ item }}"
+  args:
+    chdir: /var/www/sys-net/simple-laravel-api-with-performance
+  loop:
+    - php artisan migrate --force
+    - php artisan storage:link
+    - php artisan horizon:terminate
+
+
+# - name: Include task list in play only if the condition is true
+#   # ansible.builtin.include_tasks: "{{ hostvar }}.yaml"
+#   ansible.builtin.include_tasks: config_virtual_hosts.yml
+
+- name: Configure Virtual Hosts
+  # ansible.builtin.include_tasks: "{{ hostvar }}.yaml"
+  ansible.builtin.include_tasks: config_virtual_hosts.yml
+
+
+- name: Project Tuning configs
+  # ansible.builtin.include_tasks: "{{ hostvar }}.yaml"
+  ansible.builtin.include_tasks: connection_pool_tuning_configs.yml

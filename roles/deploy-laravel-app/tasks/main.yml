@@ -1,0 +1,218 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-app
+
+
+
+
+# -----------------------------------------------------------------------------
+# Database setup
+# -----------------------------------------------------------------------------
+
+# - name: Recursively remove directory
+#   ansible.builtin.file:
+#     path: "{{ laravel_app1_path }}"
+#     state: absent
+
+# Configure database users for the application
+
+# - name: Debug should_create_luc_user
+#   debug:
+#     msg: "should_create_luc_user is set to {{ should_create_luc_user }}"
+
+- name: Ensure Laravel app "{{ laravel_app1_name }}" database exists
+  mysql_db:
+    name: "{{ laravel_app1_db_database }}"
+    state: present
+    login_user: "{{ mariadb_root_user }}"
+    login_password: "{{ mariadb_root_user_password }}"
+  become: yes
+  
+
+- name: 'Create Laravel MariaDB user "{{ laravel_app1_db_username }}" account'
+  # when: should_create_app_user == true
+  mysql_user:
+    state: present
+    name: "{{ laravel_app1_db_username }}"
+    password: "{{ laravel_app1_db_password }}"
+    priv: "{{ laravel_app1_db_database }}.*:ALL,GRANT"  # Fixed privilege syntax
+    login_user: "{{ mariadb_root_user }}"
+    login_password: "{{ mariadb_root_user_password }}"
+    column_case_sensitive: true
+  become: yes
+
+# -----------------------------------------------------------------------------
+# Git & SSH setup (commented for now)
+# -----------------------------------------------------------------------------
+
+# - name: Generate SSH key if it doesn't exist
+#   command: ssh-keygen -f /home/vagrant/.ssh/ansible-custom-labkey -P ""
+#   args:
+#     creates: /home/vagrant/.ssh/ansible-custom-labkey
+#   become_user: vagrant
+
+# - name: Set GIT_SSH_COMMAND environment variable
+#   lineinfile:
+#     path: /home/vagrant/.bashrc
+#     line: 'export GIT_SSH_COMMAND="ssh -i /home/vagrant/.ssh/ansible-custom-labkey"'
+#     create: yes
+#   become_user: vagrant
+
+# # - name: Fetch all branches from remote
+# #   command: git fetch --all
+# #   args:
+# #     chdir: "{{ SLAWP_project_path }}"
+# #   become_user: vagrant
+
+# # - name: Checkout the remote branch
+# #   command: git checkout feature/LH/21-03-2025
+# #   args:
+# #     chdir: "{{ SLAWP_project_path }}"
+# #   become_user: vagrant
+
+# -----------------------------------------------------------------------------
+# Repo management
+# -----------------------------------------------------------------------------
+
+- name: Ensure repo directory ownership
+  file:
+    path: "{{ laravel_app1_path }}"
+    state: directory
+    owner: "{{ system_user }}"
+    group: "{{ laravel_group }}"
+    mode: '0755'
+
+- name: Clone the repo
+  git:
+    # repo: "git@github.com:tchedem/simple-laravel-api-with-performance.git"
+    repo: "https://github.com/tchedem/simple-laravel-api-with-performance.git"
+    dest: "{{ laravel_app1_path }}"
+    key_file: "/home/vagrant/.ssh/ansible-custom-labkey"
+    recursive: yes
+    single_branch: false
+    force: yes
+    update: yes
+    # version: main
+    # version: feature/LH/21-03-2025
+    # version: feature/LH/19-05-2025
+    # version: develop
+    version: feature/LH/21-05-2025
+  become_user: "{{ system_user }}"
+  become: yes
+
+# -----------------------------------------------------------------------------
+# Laravel project setup
+# -----------------------------------------------------------------------------
+
+
+# - name: Create necessary subdirectories for Laravel
+#   ansible.builtin.file:
+#     path: "{{ laravel_app1_path }}/{{ item }}"
+#     state: directory
+#     owner: "{{ system_user }}"
+#     group: "{{ laravel_group }}"
+#     mode: "{{ laravel_storage_dir_mode }}"
+#   loop:
+#     - storage/app
+#     # - storage/app/public
+#     - storage/framework
+#     # - storage/framework/cache
+#     # - storage/framework/sessions
+#     # - storage/framework/views
+#     # - storage/logs
+#     - bootstrap/cache
+#   # tags:
+#   #   - laravel
+#   #   - laravel_directories
+
+- name: Check if .env file exists
+  ansible.builtin.stat:
+    path: "{{ laravel_app1_path }}/.env"
+  register: env_file_exist
+
+- name: Copy dot env file to the project (equivalent to 0644)
+  ansible.builtin.template:
+    # src: /mytemplates/foo.j2
+    src: "templates/.env.j2"
+    dest: "{{ laravel_app1_path }}/.env"
+    owner: vagrant
+    group: www-data
+    mode: u=rwx,g=rx,o=r
+  become: yes
+  when: not env_file_exist.stat.exists
+
+# -----------------------------------------------------------------------------
+# Composer dependencies
+# -----------------------------------------------------------------------------
+- name: Check if composer is installed
+  command: which composer
+  # ignore_errors: yes
+  register: composer_version
+  become_user: vagrant
+
+- name: Install project dependencies
+  shell: "composer install -q --no-interaction"
+  args:
+    chdir: "{{ laravel_app1_path }}"
+  when: composer_version.rc == 0
+  become: yes
+  become_user: "{{ system_user }}"
+
+- name: Ensure correct permissions are defined
+  file:
+    path: "{{ laravel_app1_path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ system_user }}"
+    group: "{{ laravel_group }}"
+
+- name: Check if APP_KEY is already set
+  command: grep -E "^APP_KEY=.+$" "{{ laravel_app1_path }}/.env"
+  # command: awk -F= '$1=="APP_KEY" && $2!=""' "{{ laravel_app1_path }}/.env"
+  # changed_when: false
+  register: app_key_check
+  ignore_errors: yes
+
+- name: Run some commands
+  ansible.builtin.shell: |
+    redis-cli -a 7e024176-3c36-4e6e-89ac-ea608a41e40bb7725410-c8ca-47fa-b2b9-385f4305dcd3 -n 0 FLUSHDB 2> /dev/null
+
+    php artisan queue:clear --queue=default
+    php artisan queue:clear --queue=test-queue
+
+    php artisan queue:flush --queue=default
+    php artisan queue:flush --queue=test-queue
+
+    php artisan cache:clear
+    php artisan db:wipe
+    echo '' > storage/logs/laravel.log
+    echo '' > storage/logs/jobs.laravel.log
+    echo '' > horizon.log
+  args:
+    chdir: "{{ laravel_app1_path }}"
+  become_user: vagrant
+
+- name: Generate APP KEY
+  ansible.builtin.command: php {{ laravel_app1_path }}/artisan key:generate
+  when: app_key_check.rc != 0
+
+- name: Setup acls 
+  ansible.builtin.include_tasks: acl-subtask.yml
+
+- name: Setup supervisor 
+  ansible.builtin.include_tasks: supervisor-subtask.yml
+
+- name: Run some maintenance commands on {{ laravel_app1_name }}
+  ansible.builtin.include_tasks: performance_api-maintenance-commands.yml
+
+- name: "Setup {{ laravel_app1_name }} Tuning configs"
+  # ansible.builtin.include_tasks: "{{ hostvar }}.yaml"
+  ansible.builtin.include_tasks: performance_api-connection_pool_tuning_subtask.yml
+
+- name: "Setup {{ laravel_app1_name }} Virtual Hosts"
+  # ansible.builtin.include_tasks: "{{ hostvar }}.yaml"
+  ansible.builtin.include_tasks: performance_api-virtualhost-subtask.yml
+
+# - name: Stop 
+#   ansible.builtin.fail:
+#     msg: "Fail"

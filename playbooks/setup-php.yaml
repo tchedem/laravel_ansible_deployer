@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: yes
+  vars_files:
+    # - roles/php/vars/main.yaml
+
+  roles:
+    - role: php

@@ -1,0 +1,49 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/redis
+
+# - name: Update apt cache
+#   notify:
+#   apt:
+#     update_cache: yes
+
+- name: Install Redis
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - redis-server
+
+- name: Ensure redis is started and enable
+  ansible.builtin.service:
+    name: redis-server
+    state: started
+    enabled: yes
+
+- name: Configure Redis AUTH
+  blockinfile:
+    path: /etc/redis/redis.conf
+    create: yes
+      # bind 127.0.0.1
+      # port 6379
+    block: |
+      requirepass "{{ REDIS_PASSWORD }}"
+    marker: "# {mark} ANSIBLE-MANAGED CONFIGURATION"
+
+- name: Allow Redis to listen on all interfaces
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^bind '
+    line: 'bind 0.0.0.0 ::0'
+    # line: 'bind 127.0.0.1'
+
+    insertafter: '^bind '
+    state: present
+    backup: yes
+
+- name: Restart Redis to apply changes
+  ansible.builtin.service:
+    name: redis-server
+    state: restarted
+
+# bind 0.0.0.0

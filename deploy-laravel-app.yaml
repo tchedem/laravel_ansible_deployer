@@ -1,0 +1,8 @@
+---
+
+- name: Deploy Laravel app
+  hosts: all
+  become: true
+
+  roles:
+    - role: farisc0de.laravel

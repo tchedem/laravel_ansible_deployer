@@ -1,0 +1,63 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/iptables-firewall
+
+- name: Ensure IPTABLES package is installed
+  ansible.builtin.package:
+    name: iptables
+    state: present
+  register: iptablesPresent
+
+- name: Debug iptables Present
+  ansible.builtin.debug:
+    msg: "{{ iptablesPresent }}"
+
+# This too tend to block by default all the traffic on the VM (I don't want to use something that is too much or heavy)
+- name: Flush existing IPTABLES rules
+  ansible.builtin.shell: |
+    iptables -P INPUT ACCEPT  # Default INPUT chain rule
+    iptables -P OUTPUT ACCEPT  # Default OUTPUT chain rule
+    iptables -F
+    iptables -X
+    # iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    # iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+    # iptables -A INPUT -j DROP
+#     iptables -F
+#     iptables -X
+
+- name: Accept established and related connections
+  ansible.builtin.shell: iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+- name: Allow loopback traffic
+  ansible.builtin.shell: iptables -A INPUT -i lo -j ACCEPT
+
+- name: Allow SSH (port 22)
+  ansible.builtin.shell: iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+- name: Allow HTTP (port 80)
+  ansible.builtin.shell: iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+
+- name: Allow HTTPS (port 443)
+  ansible.builtin.shell: iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+- name: Allow some web APP (port 8000)
+  ansible.builtin.shell: iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+
+- name: Allow Redis (port 6379)
+  ansible.builtin.shell: iptables -A INPUT -p tcp --dport 6379 -j ACCEPT
+
+
+- name: Drop all other incoming traffic
+  ansible.builtin.shell: iptables -P INPUT DROP
+
+- name: Ensure the /etc/iptables directory exists
+  ansible.builtin.file:
+    path: /etc/iptables
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# Another alternative is to use systemd for persistence search `systemd_make_role_persistent.md`
+- name: Save IPTABLES rules persistently
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4

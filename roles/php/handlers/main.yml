@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/php
+
+- name: Update the package index
+  apt:
+    update_cache: yes

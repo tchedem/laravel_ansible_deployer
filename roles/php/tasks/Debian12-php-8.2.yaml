@@ -1,0 +1,63 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/php
+
+- name: "Install apt-transport-https gnupg lsb-release ca-certificates wget"
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - gnupg
+    - lsb-release
+    - ca-certificates
+
+# sudo apt install php8.2-fpm php8.2-cli libapache2-mod-php8.2 php8.2-{bcmath,bz2,ctype,common,cli,curl,dom,exif,ftp,gd,gettext,grpc,intl,ldap,mbstring,mongodb,mysqli,mysqlnd,pdo,pgsql,redis,soap,sockets,tokenizer,xml,xmlreader,xmlwriter,xsl,zip} -y
+- name: Install PHP 8.2 and required modules
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - php8.2
+    - php8.2-fpm
+    - php8.2-cli
+    - libapache2-mod-php8.2
+    - php8.2-bcmath
+    - php8.2-bz2
+    - php8.2-ctype
+    - php8.2-common
+    - php8.2-cli
+    - php8.2-curl
+    - php8.2-dom
+    - php8.2-exif
+    - php8.2-ftp
+    - php8.2-gd
+    - php8.2-gettext
+    # - php8.2-grpc
+    - php8.2-intl
+    - php8.2-ldap
+    - php8.2-mbstring
+    - php8.2-mongodb
+    - php8.2-mysqli
+    - php8.2-mysqlnd
+    - php8.2-pdo
+    - php8.2-pgsql
+    - php8.2-redis
+    - php8.2-soap
+    - php8.2-sockets
+    - php8.2-tokenizer
+    - php8.2-xml
+    - php8.2-xmlreader
+    - php8.2-xmlwriter
+    - php8.2-xsl
+    - php8.2-zip
+
+- name: Configure PHP alternatives
+  command: update-alternatives --set php /usr/bin/php8.2
+
+- name: Check PHP version
+  command: php -v
+  register: php_version
+
+- debug:
+    msg: "PHP version installed: {{ php_version.stdout }}"

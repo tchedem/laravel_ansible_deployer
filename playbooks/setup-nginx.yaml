@@ -1,0 +1,9 @@
+---
+
+- hosts: web-srvs
+  become: yes
+  vars_files:
+    # - roles/nginx/vars/main.yaml
+
+  roles:
+    - role: nginx

@@ -1,0 +1,89 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-app
+
+- name: Install ACL on Debian/Ubuntu
+  ansible.builtin.package:
+    name: acl
+    state: present
+  become: True
+
+- name: Check if ACL package is installed
+  command: which getfacl
+  register: getfacl_check
+  ignore_errors: True
+
+- name: Set app users ACLs for storage directory
+  shell: |
+
+    # -R : recursive
+    # -m : Update/Create
+    # -d : Default ACL (Apply to new files and folders)
+
+    # Give full access recursively
+    setfacl -Rdm u:www-data:rwx /var/www/local/performance_api/storage
+    setfacl -Rdm u:www-data:rwx /var/www/local/performance_api/bootstrap/cache
+
+    # Also fix existing files
+    setfacl -Rm u:www-data:rwx /var/www/local/performance_api/storage
+    setfacl -Rm u:www-data:rwx /var/www/local/performance_api/bootstrap/cache
+
+  become: true
+  when: getfacl_check.rc == 0
+
+# For idempotency use acl module
+# - name: Ensure www-data has ACLs on Laravel runtime directories
+#   become: true
+#   vars:
+#     laravel_runtime_dirs:
+#       - "{{ laravel_app1_path }}/bootstrap/cache"
+#       - "{{ laravel_app1_path }}/storage"
+#   loop: "{{ laravel_runtime_dirs }}"
+#   ansible.posix.acl:
+#     path: "{{ item }}"
+#     entity: www-data
+#     etype: user
+#     permissions: rwx
+#     recursive: true
+#     default: true   # ensures new files also inherit ACLs
+
+
+# - name: Set ACL for www-data on Laravel runtime directories (current files)
+#   become: true
+#   loop: "{{ laravel_runtime_dirs }}"
+#   ansible.posix.acl:
+#     path: "{{ item }}"
+#     entity: www-data
+#     etype: user
+#     permissions: rwx
+#     state: present
+#     recursive: true
+
+# - name: Set default ACL for www-data on Laravel runtime directories
+#   become: true
+#   loop: "{{ laravel_runtime_dirs }}"
+#   ansible.posix.acl:
+#     path: "{{ item }}"
+#     entity: www-data
+#     etype: user
+#     permissions: rwx
+#     state: present
+#     default: true
+
+# vagrant@local:/var/www/local/performance_api$ getfacl bootstrap/
+# # file: bootstrap/
+# # owner: vagrant
+# # group: www-data
+# user::rwx
+# group::r-x
+# other::r-x
+
+# vagrant@local:/var/www/local/performance_api$ getfacl bootstrap/
+# # file: bootstrap/
+# # owner: vagrant
+# # group: www-data
+# user::rwx
+# user:www-data:r-x
+# group::r-x
+# mask::r-x
+# other::r-x

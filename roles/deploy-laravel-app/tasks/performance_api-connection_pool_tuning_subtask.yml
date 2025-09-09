@@ -1,0 +1,42 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-app
+
+
+- name: Copy virtualHost connection pool configuration file
+  ansible.builtin.template:
+    # src: api.test.simple_laravel_api_with_performance.com_connections_pools.conf.j2
+    # {{ laravel_app1_name }}.com.conf
+    src: "{{ laravel_app1_name }}.connection_pool_tuning.conf.j2"
+    dest: "/etc/php/8.2/fpm/pool.d/{{ laravel_app1_name }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  register: connection_pool_status
+
+
+# - name: Debug connection_pool_status
+#   ansible.builtin.debug:
+#     var: connection_pool_status
+
+
+# - name: Fail
+#   ansible.builtin.fail:
+#     msg: fail
+
+
+# - name: Restart Nginx
+#   ansible.builtin.service:
+#     name: nginx
+#     state: restarted
+#   become: true
+#   # when: connection_pool_status.changed
+
+
+- name: Restart FPM
+  ansible.builtin.service:
+    name: php8.2-fpm
+    state: restarted
+  become: true
+  # when: connection_pool_status.changed

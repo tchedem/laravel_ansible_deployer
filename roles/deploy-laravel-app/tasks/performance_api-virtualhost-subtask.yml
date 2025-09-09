@@ -1,0 +1,45 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-app
+
+# - name: Failed
+#   ansible.builtin.fail:
+#     msg: Fail
+
+- name: Copy VirtualHost template file to the server
+  ansible.builtin.template:
+    # src: "templates/{{ item.nginx_domain_conf_name }}.j2"
+    # dest: "/etc/nginx/sites-available/{{ item.nginx_domain_conf_name }}"
+    src: "{{ laravel_app1_name }}.virtualhost.conf.j2"
+    dest: "/etc/nginx/sites-available/{{ laravel_app1_name }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  # loop: "{{ virtual_hosts }}"
+
+
+- name: Enable the virtualHost
+  ansible.builtin.file:
+    # src: "/etc/nginx/sites-available/{{ item.nginx_domain_conf_name }}"
+    # dest: "/etc/nginx/sites-enabled/{{ item.nginx_domain_conf_name }}"
+    src: "/etc/nginx/sites-available/{{ laravel_app1_name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ laravel_app1_name }}.conf"
+    owner: root
+    group: root
+    state: link
+  become: true
+  # notify: Restart Nginx
+  # loop: "{{ virtual_hosts }}"
+
+# - name: Validate Nginx configuration
+#   ansible.builtin.command:
+#     cmd: nginx -t
+#   register: nginx_validation
+#   ignore_errors: true
+
+- name: Restart Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+  become: true

@@ -1,11 +1,14 @@
-filter_plugins
-library
-module_utils
-scripts
-# vagrant
+inventories
+
+jon.json
 
 notes.md
-errors.md
 i.md
 .vaultFile
-.vscode
+ad-hoc.md 
+
+errors.md
+
+*certbot*
+
+scripts

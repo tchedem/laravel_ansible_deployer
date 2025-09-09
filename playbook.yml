@@ -1,10 +1,36 @@
 ---
 
-- hosts: all
-# - hosts: webservers
+- name: Common actions
+  ansible.builtin.import_playbook: playbooks/setup-common.yaml
 
-  tasks:
+- name: Install & Setup Iptables Firewall
+  ansible.builtin.import_playbook: playbooks/setup-iptables-firewall.yaml
 
-    - name: Just a debug 
-      ansible.builtin.debug:
-        msg: "ENV: {{ env }} ---- MSG: {{ debug_msg }}"
+- name: Install Nginx
+  ansible.builtin.import_playbook: playbooks/setup-nginx.yaml
+
+- name: Install PHP
+  ansible.builtin.import_playbook: playbooks/setup-php.yaml
+
+- name: Install Composer
+  ansible.builtin.import_playbook: playbooks/setup-composer.yaml
+
+- name: Install MariaDB
+  ansible.builtin.import_playbook: playbooks/setup-mariadb.yaml
+  
+- name: Install MongoDB
+  ansible.builtin.import_playbook: playbooks/setup-mongodb.yaml
+  
+- name: Install Redis
+  ansible.builtin.import_playbook: playbooks/setup-redis.yaml
+  
+- name: Install Supervisor
+  ansible.builtin.import_playbook: playbooks/setup-supervisor.yaml
+
+- name: Install certbot
+  ansible.builtin.import_playbook: playbooks/setup-certbot.yaml
+
+- name: Deploy Laravel Application
+  ansible.builtin.import_playbook: playbooks/deploy-laravel-app.yaml
+
+  

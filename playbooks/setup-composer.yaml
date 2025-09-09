@@ -1,0 +1,9 @@
+---
+
+- hosts: web-srvs
+  become: yes
+  vars_files:
+    # - roles/composer/vars/main.yaml
+
+  roles:
+    - role: composer

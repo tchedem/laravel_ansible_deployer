@@ -1,0 +1,37 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/common
+
+# DEBIAN BASED SYSTEM COMMANDS
+
+- name: System Distro
+  debug:
+    var: ansible_os_family
+
+- name: Update system 
+  shell: "timedatectl set-ntp off; timedatectl set-ntp on"
+  become: yes
+
+- name: Update the package list
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600  # Cache valid for 1 hour (3600 seconds)
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Perform a full upgrade (Debian-based)
+  ansible.builtin.apt:
+    upgrade: full
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install required packages (curl, git, zip, gzip)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  become: yes
+  loop:
+    - curl
+    - git
+    - zip
+    - gzip

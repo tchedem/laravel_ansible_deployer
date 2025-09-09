@@ -1,0 +1,23 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/nginx
+
+- name: Install Nginx
+  apt:
+    name:
+      - nginx
+    state: present
+
+# check if apache is enable
+- name: Stop Apache2
+  service:
+    name: apache2
+    state: stopped
+    enabled: no
+  ignore_errors: true
+
+- name: Start Nginx and enable Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes

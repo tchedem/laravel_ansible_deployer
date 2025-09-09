@@ -1,0 +1,9 @@
+---
+
+- hosts: database-srvs
+  become: yes
+  vars_files:
+    # - roles/redis/vars/main.yaml
+
+  roles:
+    - role: redis

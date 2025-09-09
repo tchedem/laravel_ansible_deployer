@@ -1,0 +1,37 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/composer
+
+# - name: Check if composer is installed
+#   shell: which composer
+#   ignore_errors: yes
+#   register: composer_version
+
+- name: Ensure PHP CLI is installed
+  ansible.builtin.apt:
+    name:
+      - php-cli
+      - unzip   # required by composer sometimes
+    state: present
+    update_cache: yes
+
+- name: Download Composer installer
+  ansible.builtin.get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-setup.php
+    mode: '0644'
+
+
+# - name: Install composer
+#   shell: |
+#     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+#     php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+#     php composer-setup.php
+#     php -r "unlink('composer-setup.php');"
+#     mv composer.phar /usr/bin/composer
+#   when: composer_version.rc != 0
+
+- name: Install Composer
+  ansible.builtin.command:
+    cmd: php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    creates: /usr/local/bin/composer

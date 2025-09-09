@@ -1,0 +1,77 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/php
+
+- name: "Install apt-transport-https gnupg lsb-release ca-certificates wget"
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - gnupg
+    - lsb-release
+    - ca-certificates
+
+- name: Download Sury repo
+  get_url:
+    url: https://packages.sury.org/php/apt.gpg
+    dest: /etc/apt/trusted.gpg.d/php.gpg
+    mode: '0644'
+
+- name: "Get system release codename"
+  shell: "lsb_release -sc"
+  register: syst_codename
+
+- name: Adds the Sury PHP repository to the APT sources list
+  command: sudo sh -c 'echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+  notify: Update the package index
+
+- name: Install PHP 8.1 and required modules
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - php8.1
+    - php8.1-fpm
+    - php8.1-cli
+    - libapache2-mod-php8.1
+    - php8.1-bcmath
+    - php8.1-bz2
+    - php8.1-ctype
+    - php8.1-common
+    - php8.1-cli
+    - php8.1-curl
+    - php8.1-dom
+    - php8.1-exif
+    - php8.1-ftp
+    - php8.1-gd
+    - php8.1-gettext
+    - php8.1-grpc
+    - php8.1-intl
+    - php8.1-ldap
+    - php8.1-mbstring
+    - php8.1-mongodb
+    - php8.1-mysqli
+    - php8.1-mysqlnd
+    - php8.1-pdo
+    - php8.1-pgsql
+    - php8.1-redis
+    - php8.1-soap
+    - php8.1-sockets
+    - php8.1-tokenizer
+    - php8.1-xml
+    - php8.1-xmlreader
+    - php8.1-xmlwriter
+    - php8.1-xsl
+    - php8.1-zip
+
+
+- name: Configure PHP alternatives
+  command: update-alternatives --set php /usr/bin/php8.1
+
+- name: Check PHP version
+  command: php -v
+  register: php_version
+
+- debug:
+    msg: "PHP version installed: {{ php_version.stdout }}"

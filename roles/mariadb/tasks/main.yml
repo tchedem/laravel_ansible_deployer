@@ -1,0 +1,34 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/mariadb
+
+- name: "Install zip"
+  apt:
+    name: zip
+    state: present
+  become: yes
+  
+- name: "Install MariaDB"
+  apt:
+    name: mariadb-server
+    state: present
+  become: yes
+
+- name: Make sure service is started and enabled
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: "Install Ansible required package to interract with MySQL/MariaDB (Python and MySQL client)"
+  apt:
+    name: python3-pymysql
+    state: present
+  become: yes
+
+- name: Change root authentication method to mysql_native_password
+  mysql_query:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    query: 'SET PASSWORD FOR "{{ mariadb_root_user }}"@"localhost" = PASSWORD("{{ mariadb_root_user_password }}");'
+    # ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_new_password';
+  become: yes

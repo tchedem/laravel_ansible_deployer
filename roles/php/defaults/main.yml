@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/php
+
+php_version: "8.2"
+# os_version: "{{ ansible_distribution_version }}"  # optional, if you want OS-specific logic
+distro: "{{ ansible_distribution }}{{ansible_distribution_major_version}}"
+
+
+system_info : "{{ ansible_facts }}"

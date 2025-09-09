@@ -1,0 +1,39 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/deploy-laravel-app
+# Subtask: Install and configure Supervisor for Laravel
+
+- name: Ensure Supervisor is installed
+  ansible.builtin.apt:
+    name: supervisor
+    state: present
+  become: True
+
+- name: Ensure Supervisor service is running and enabled
+  ansible.builtin.service:
+    name: supervisor
+    state: started
+    enabled: yes
+  become: True
+
+- name: Copy Supervisor config for Laravel app
+  ansible.builtin.template:
+    src: "templates/{{ laravel_app1_name }}.supervisor.conf.j2"
+    dest: "/etc/supervisor/conf.d/{{ laravel_app1_name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+    backup: yes
+  become: True
+
+- name: Reload Supervisor configuration
+  ansible.builtin.command: supervisorctl reread
+  become: True
+
+- name: Update Supervisor with new config
+  ansible.builtin.command: supervisorctl update
+  become: True
+
+- name: Restart Laravel Horizon via Supervisor
+  ansible.builtin.command: supervisorctl restart horizon:*
+  become: True

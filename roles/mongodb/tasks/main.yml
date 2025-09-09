@@ -1,0 +1,44 @@
+---
+# tasks file for roles/mongodb
+
+- name: Update package database 
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+
+- name: Install some packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - gnupg
+    - curl
+    - dirmngr
+    - gnupg
+    - apt-transport-https
+    - software-properties-common
+    - ca-certificates
+
+- name: Import Mongo public key
+  ansible.builtin.shell:
+    cmd: |
+      curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor --yes
+      echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/8.0 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+  notify: Update the package index
+
+- name: Update package database 
+  ansible.builtin.apt:
+    update_cache: yes
+  become: yes
+
+- name: Install mongodb-org packages
+  ansible.builtin.apt:
+    name: mongodb-org
+    state: present
+
+- name: Enable mongo service
+  ansible.builtin.service:
+    name: mongod
+    state: started
+    enabled: yes
+    
