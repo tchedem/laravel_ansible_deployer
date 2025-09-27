@@ -1,3 +1,11 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/redis
+
+redis_conf_path: /etc/redis/redis.conf
+
+maxmemory: 1gb
+
+# allkeys-lru means that when maxmemory is reached, Redis will evict the least recently used keys out of all keys.
+# alternative policies include : volatile-lru, allkeys-random, volatile-random, volatile-ttl, noeviction
+maxmemory_policy: allkeys-lru 
