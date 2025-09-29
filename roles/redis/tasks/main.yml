@@ -20,6 +20,12 @@
     state: started
     enabled: yes
 
+- name: Backup original Redis configuration file
+  copy:
+    src: "{{ redis_conf_path }}"
+    dest: "{{ redis_conf_path }}.backup"
+    remote_src: yes
+
 - name: Configure Redis AUTH
   blockinfile:
     path: /etc/redis/redis.conf
@@ -30,13 +36,26 @@
       requirepass "{{ REDIS_PASSWORD }}"
     marker: "# {mark} ANSIBLE-MANAGED CONFIGURATION"
 
+- name: Ensure Redis configuration has maxmemory set
+  lineinfile:
+    path: "{{ redis_conf_path }}"
+    regexp: '^maxmemory '
+    line: "maxmemory {{ maxmemory }}"
+    state: present
+
+- name: Ensure Redis eviction policy is set
+  lineinfile:
+    path: "{{ redis_conf_path }}"
+    regexp: '^maxmemory-policy '
+    line: "maxmemory-policy {{ maxmemory_policy }}"
+    state: present
+
 - name: Allow Redis to listen on all interfaces
   ansible.builtin.lineinfile:
     path: /etc/redis/redis.conf
     regexp: '^bind '
     line: 'bind 0.0.0.0 ::0'
     # line: 'bind 127.0.0.1'
-
     insertafter: '^bind '
     state: present
     backup: yes
@@ -45,5 +64,4 @@
   ansible.builtin.service:
     name: redis-server
     state: restarted
-
-# bind 0.0.0.0
+    enabled: yes

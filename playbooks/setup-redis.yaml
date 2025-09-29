@@ -6,4 +6,5 @@
     # - roles/redis/vars/main.yaml
 
   roles:
+    # the "role:" key bellow is optional. You can just put the role name
     - role: redis
