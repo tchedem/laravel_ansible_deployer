@@ -1,0 +1,40 @@
+---
+
+# =============================
+# Laravel Application Variables
+# =============================
+
+# Project Path
+laravel_app1_path: /var/www/local/performance_api
+
+# Project Supervisor Variables
+laravel_numprocs: 2
+
+# Project owner
+system_user: vagrant
+laravel_group: www-data
+laravel_user: www-data
+
+# Laravel Performance Application
+laravel_app1_name: performance_api
+laravel_env: local
+laravel_app1_debug: false
+laravel_app1_name_domain_name: performance_api.local
+
+# Database Credentials
+laravel_app1_db_username: "performance_api_app_user"
+laravel_app1_db_password: "9****3"
+
+# Database
+laravel_app1_db_connection: mysql
+laravel_app1_db_database: performance_api
+laravel_app1_db_host: 127.0.0.1
+laravel_app1_db_port: 3306
+
+# Drivers
+laravel_app1_cache_driver: file
+laravel_app1_queue_driver: sync
+laravel_app1_session_driver: file
+
+# Redis
+REDIS_PASSWORD: "7****3"
