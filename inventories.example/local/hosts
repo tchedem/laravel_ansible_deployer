@@ -1,0 +1,9 @@
+[web-srvs]
+192.168.56.155
+
+[database-srvs]
+192.168.56.155
+
+[all:children]
+web-srvs
+database-srvs
