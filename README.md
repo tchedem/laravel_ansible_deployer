@@ -39,7 +39,7 @@ cd laravel_ansible_deployer
 
 2. Initialize inventory (*optional*)
 ```bash
-mv inventories_example inventories
+mv inventories.example inventories
 ```
 
 
