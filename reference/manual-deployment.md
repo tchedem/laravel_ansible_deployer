@@ -1,3 +1,5 @@
+```bash
+
 #!/bin/bash
 set -e
 
@@ -110,3 +112,5 @@ sudo nginx -t
 sudo systemctl restart nginx
 
 echo "=== Deployment completed successfully! ==="
+
+```
