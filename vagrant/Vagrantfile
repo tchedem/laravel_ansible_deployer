@@ -4,11 +4,8 @@ Vagrant.configure("2") do |config|
 
   machines = {
     "local"    => "192.168.56.155"
-    # ,
-    # "production"    => "192.168.56.200",
-    # "staging"    => "192.168.56.201",
-    # "test"    => "192.168.56.202"
   }
+feature/LH/add-python-script-for-cn-bootstrap-script_2025-09-25
 
   machines.each do |name, ip|
 
