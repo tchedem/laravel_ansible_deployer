@@ -5,7 +5,7 @@
 - name: Execute Laravel maintenance commands
   command: "{{ item }}"
   args:
-    chdir: "{{ laravel_app1_path }}"
+    chdir: "{{ PROJECT_PATH }}"
   loop:
     - php artisan migrate --force
     - php artisan storage:link

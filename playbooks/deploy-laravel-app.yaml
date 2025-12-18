@@ -1,6 +1,7 @@
 ---
 
-- hosts: all
+# - hosts: all
+- hosts: performance-api
   become: yes
   vars_files:
     # - roles/deploy-laravel-all/vars/main.yaml
