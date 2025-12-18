@@ -21,12 +21,12 @@
     # -d : Default ACL (Apply to new files and folders)
 
     # Give full access recursively
-    setfacl -Rdm u:www-data:rwx /var/www/local/performance_api/storage
-    setfacl -Rdm u:www-data:rwx /var/www/local/performance_api/bootstrap/cache
+    setfacl -Rdm u:"{{ PROJECT_USER }}":rwx "{{ PROJECT_PATH }}"/storage 
+    setfacl -Rdm u:"{{ PROJECT_USER }}":rwx "{{ PROJECT_PATH }}"/bootstrap/cache
 
     # Also fix existing files
-    setfacl -Rm u:www-data:rwx /var/www/local/performance_api/storage
-    setfacl -Rm u:www-data:rwx /var/www/local/performance_api/bootstrap/cache
+    setfacl -Rm u:"{{ PROJECT_USER }}":rwx "{{ PROJECT_PATH }}"/storage
+    setfacl -Rm u:"{{ PROJECT_USER }}":rwx "{{ PROJECT_PATH }}"/bootstrap/cache
 
   become: true
   when: getfacl_check.rc == 0
@@ -36,8 +36,8 @@
 #   become: true
 #   vars:
 #     laravel_runtime_dirs:
-#       - "{{ laravel_app1_path }}/bootstrap/cache"
-#       - "{{ laravel_app1_path }}/storage"
+#       - "{{ PROJECT_PATH }}/bootstrap/cache"
+#       - "{{ PROJECT_PATH }}/storage"
 #   loop: "{{ laravel_runtime_dirs }}"
 #   ansible.posix.acl:
 #     path: "{{ item }}"

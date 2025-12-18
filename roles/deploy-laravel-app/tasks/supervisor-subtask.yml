@@ -18,8 +18,8 @@
 
 - name: Copy Supervisor config for Laravel app
   ansible.builtin.template:
-    src: "templates/{{ laravel_app1_name }}.supervisor.conf.j2"
-    dest: "/etc/supervisor/conf.d/{{ laravel_app1_name }}.conf"
+    src: "templates/{{ APP_NAME }}.supervisor.conf.j2"
+    dest: "/etc/supervisor/conf.d/{{ APP_NAME }}.conf"
     owner: root
     group: root
     mode: "0644"

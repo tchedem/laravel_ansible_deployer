@@ -10,8 +10,8 @@
   ansible.builtin.template:
     # src: "templates/{{ item.nginx_domain_conf_name }}.j2"
     # dest: "/etc/nginx/sites-available/{{ item.nginx_domain_conf_name }}"
-    src: "{{ laravel_app1_name }}.virtualhost.conf.j2"
-    dest: "/etc/nginx/sites-available/{{ laravel_app1_name }}.conf"
+    src: "{{ APP_NAME }}.virtualhost.conf.j2"
+    dest: "/etc/nginx/sites-available/{{ APP_NAME }}.conf"
     owner: root
     group: root
     mode: '0644'
@@ -23,8 +23,8 @@
   ansible.builtin.file:
     # src: "/etc/nginx/sites-available/{{ item.nginx_domain_conf_name }}"
     # dest: "/etc/nginx/sites-enabled/{{ item.nginx_domain_conf_name }}"
-    src: "/etc/nginx/sites-available/{{ laravel_app1_name }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ laravel_app1_name }}.conf"
+    src: "/etc/nginx/sites-available/{{ APP_NAME }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ APP_NAME }}.conf"
     owner: root
     group: root
     state: link

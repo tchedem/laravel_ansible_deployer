@@ -2,7 +2,7 @@
 user = www-data
 group = www-data
 
-listen = /run/php/php8.2-fpm-{{ laravel_app1_name }}.sock
+listen = /run/php/php8.2-fpm-{{ APP_NAME }}.sock
 listen.owner = www-data
 listen.group = www-data
 
@@ -12,7 +12,7 @@ pm.start_servers = 3
 pm.min_spare_servers = 2
 pm.max_spare_servers = 5
 
-php_admin_value[error_log] = /var/log/php8.2-fpm-{{ laravel_app1_name }}.log
+php_admin_value[error_log] = /var/log/php8.2-fpm-{{ APP_NAME }}.log
 php_admin_flag[log_errors] = on
 
 ; upload_max_filesize → maximum size of a single uploaded file (or chunk)
