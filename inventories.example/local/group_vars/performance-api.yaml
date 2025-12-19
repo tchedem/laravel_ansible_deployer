@@ -22,7 +22,7 @@ APP_NAME: performance-api
 # APP_ENV: staging
 # APP_ENV: prod
 APP_ENV: local
-# APP_KEY: "base64:v9d6lqDmIRYthsOsG44qsaGC4ps4GFmvhWfMSMb/Xr4:"
+# APP_KEY: 
 APP_DEBUG: true
 
 APP_URL: http://performance-api.com
@@ -42,15 +42,20 @@ DB_DATABASE: "performance-api_db"
 DB_USERNAME: "laravel-user"
 DB_PASSWORD: "98@12*POasxfuybve"
 
+
+# mongosh "mongodb://192.168.56.155:27017"
+
 # MONGODB_HOST: 127.0.0.1
 # MONGODB_PORT: 27017
 # MONGODB_DATABASE: "performance-api_db"
 # MONGODB_USERNAME: "laravel-user"
 # MONGODB_PASSWORD: "98@12*POasxfuybve"
 
+
 BROADCAST_DRIVER: log
 CACHE_DRIVER: file
 FILESYSTEM_DISK: local
+
 
 # BROADCAST_DRIVER: log
 QUEUE_CONNECTION: sync
@@ -68,3 +73,8 @@ REDIS_CLIENT: predis
 REDIS_HOST: 127.0.0.1
 REDIS_PASSWORD: "7e024176-3c36-4e6e-89ac-ea608a41e40bb7725410-c8ca-47fa-b2b9-385f4305dcd3"
 REDIS_PORT: 6379
+
+
+HORIZON_BASIC_AUTH_USERNAMES: horizonadmin5879@performance-api.com
+HORIZON_BASIC_AUTH_PASSWORD: kyAJG9PASS
+

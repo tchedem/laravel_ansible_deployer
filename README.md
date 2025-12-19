@@ -57,5 +57,5 @@ cat README.md
 3. Start cooking from your Control Node (CN)
 ```bash
 # ansible-playbook -i inventories/test main_playbook.yml -u <your_username>
-ansible-playbook -i inventories/test main_playbook.yml -u vagrant # If you are using vagrant
+ansible-playbook -i inventories/local main_playbook.yml -u vagrant # If you are using vagrant
 ```

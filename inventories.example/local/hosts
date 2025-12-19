@@ -4,6 +4,10 @@
 [database-srvs]
 192.168.56.155
 
+[performance-api:children]
+web-srvs
+database-srvs
+
 [all:children]
 web-srvs
 database-srvs
