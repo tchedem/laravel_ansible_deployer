@@ -2,13 +2,12 @@
 ---
 # tasks file for roles/deploy-laravel-app
 
-
 - name: Copy virtualHost connection pool configuration file
   ansible.builtin.template:
     # src: api.test.simple_laravel_api_with_performance.com_connections_pools.conf.j2
-    # {{ laravel_app1_name }}.com.conf
-    src: "{{ laravel_app1_name }}.connection_pool_tuning.conf.j2"
-    dest: "/etc/php/8.2/fpm/pool.d/{{ laravel_app1_name }}.conf"
+    # {{ APP_NAME }}.com.conf
+    src: "{{ APP_NAME }}.connection_pool_tuning.conf.j2"
+    dest: "/etc/php/8.2/fpm/pool.d/{{ APP_NAME }}.conf"
     owner: root
     group: root
     mode: '0644'

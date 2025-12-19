@@ -10,11 +10,11 @@ NB: The project don't integrate `SSL/TLS`
 
 ### Project Structure
 
-`playbook.yml` is the entry point of project! 
-`playbooks/` contain main Ansible playbooks for provisioning and deployment
+`main_playbook.yml` is the entry point of project! 
+`playbooks/` contain Ansible playbooks for provisioning and deployment
 `roles/` Modular roles for different parts of the stack
 `vagrant/` Local test environment (Vagrant + VirtualBox). (NB: You can use any Hypervisor)
-`reference/` *have some a manual process ofdeployment of the solution! It's no-more updated! But I left it to share the importance of doing things by our own at least once!*
+`reference/` *have some a manual process ofdeployment of the solution! It's no-more updated! But I left it to share the importance of doing things manually at least once!*
 
 ### Roles Overview
 
@@ -56,6 +56,6 @@ cat README.md
 
 3. Start cooking from your Control Node (CN)
 ```bash
-# ansible-playbook -i inventories/test playbook.yml -u <your_username>
-ansible-playbook -i inventories/test playbook.yml -u vagrant # If you are using vagrant
+# ansible-playbook -i inventories/test main_playbook.yml -u <your_username>
+ansible-playbook -i inventories/test main_playbook.yml -u vagrant # If you are using vagrant
 ```

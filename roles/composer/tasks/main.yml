@@ -21,7 +21,6 @@
     dest: /tmp/composer-setup.php
     mode: '0644'
 
-
 # - name: Install composer
 #   shell: |
 #     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"

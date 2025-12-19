@@ -32,5 +32,3 @@
 
 - name: Deploy Laravel Application
   ansible.builtin.import_playbook: playbooks/deploy-laravel-app.yaml
-
-  
